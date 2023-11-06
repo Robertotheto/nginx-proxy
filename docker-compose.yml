@@ -15,10 +15,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /etc/nginx/vhost.d
-      - /usr/share/nginx/html
+      - letsencrypt-vhost-d:/etc/nginx/vhost.d
+      - letsencrypt-html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
-      - /etc/nginx/certs
+      - letsencrypt-certs:/etc/nginx/certs
       - ./custom.conf:/etc/nginx/conf.d/custom.conf
     environment:
       - VIRTUAL_HOST=robertofilhodev.tech
@@ -29,9 +29,14 @@ services:
     image: jrcs/letsencrypt-nginx-proxy-companion
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt-certs:/etc/nginx/certs
+      - letsencrypt-vhost-d:/etc/nginx/vhost.d
+      - letsencrypt-html:/usr/share/nginx/html
+    environment:
+      - DEFAULT_EMAIL=dev@robertofilhodev.tech
     volumes_from:
       - nginx-proxy
-  protainer:
+  portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
     ports:
@@ -45,5 +50,12 @@ services:
     environment:
       - VIRTUAL_HOST=portainer.robertofilhodev.tech
 
+networks:
+  default:
+    external:
+      name: nginx-proxy
 volumes:
   portainer_data:
+  letsencrypt-certs:
+  letsencrypt-vhost-d:
+  letsencrypt-html:
